@@ -9,13 +9,23 @@ const flash = require('connect-flash');
 const app = express();
 
 // Database connection
-const db = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'C237_regapp'
-});
+// const db = mysql.createConnection({
+//   host: 'localhost',
+// user: 'root',
+// password: '',
+// database: 'C237_regapp'
+// });
 
+
+const db = mysql.createConnection({
+    host: 'c237-meilan-mysql.mysql.database.azure.com',
+    user: 'c237_010',
+    password: 'c237010@2026!',
+    database: 'C237_010_team1_registrationapp',
+    ssl: {
+        rejectUnauthorized: false
+    }
+})
 db.connect((err) => {
     if (err) {
         throw err;
@@ -32,7 +42,7 @@ app.use(session({
     resave: false,
     saveUninitialized: true,
     // Session expires after 1 week of inactivity
-    cookie: {maxAge: 1000 * 60 * 60 * 24 * 7}
+    cookie: { maxAge: 1000 * 60 * 60 * 24 * 7 }
 }));
 
 app.use(flash());
@@ -62,7 +72,7 @@ const checkAdmin = (req, res, next) => {
 
 // Routes
 app.get('/', (req, res) => {
-    res.render('index', { user: req.session.user, messages: req.flash('success')});
+    res.render('index', { user: req.session.user, messages: req.flash('success') });
 });
 
 app.get('/register', (req, res) => {
@@ -77,7 +87,7 @@ const validateRegistration = (req, res, next) => {
     if (!username || !email || !password || !address || !contact) {
         return res.status(400).send('All fields are required.');
     }
-    
+
     if (password.length < 6) {
         req.flash('error', 'Password should be at least 6 or more characters long');
         req.flash('formData', req.body);
@@ -90,7 +100,7 @@ const validateRegistration = (req, res, next) => {
 //******** TODO: Integrate validateRegistration into the register route. ********//
 app.post('/register', validateRegistration, (req, res) => {
     //******** TODO: Update register route to include role. ********//
-    const { username, email, password, address, contact, role} = req.body;
+    const { username, email, password, address, contact, role } = req.body;
 
     const sql = 'INSERT INTO users (username, email, password, address, contact, role) VALUES (?, ?, SHA1(?), ?, ?, ?)';
     db.query(sql, [username, email, password, address, contact, role], (err, result) => {
@@ -105,9 +115,9 @@ app.post('/register', validateRegistration, (req, res) => {
 
 //******** TODO: Insert code for login routes to render login page below ********//
 app.get('/login', (req, res) => {
-    res.render('login', { 
-        messages: req.flash('success'), 
-        errors: req.flash('error') 
+    res.render('login', {
+        messages: req.flash('success'),
+        errors: req.flash('error')
     });
 });
 
